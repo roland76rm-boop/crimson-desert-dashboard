@@ -58,7 +58,7 @@ export default function Timeline() {
             <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
             <XAxis dataKey="date" tick={{ fill: '#94A3B8', fontSize: 12 }} />
             <YAxis tick={{ fill: '#94A3B8', fontSize: 12 }} tickFormatter={v => formatSilver(v)} />
-            <Tooltip {...tooltipStyle} formatter={(v: number) => formatSilver(v)} />
+            <Tooltip {...tooltipStyle} formatter={(v: unknown) => formatSilver(v as number)} />
             <Area type="monotone" dataKey="silver" stroke="#D4AF37" fill="#D4AF37" fillOpacity={0.15} strokeWidth={2} />
           </AreaChart>
         </ResponsiveContainer>
