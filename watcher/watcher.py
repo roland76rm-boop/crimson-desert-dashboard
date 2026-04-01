@@ -1,7 +1,6 @@
 """
 Crimson Desert Save File Watcher.
-Monitors save directory for changes, parses save files, uploads to backend API.
-Supports mock mode for development without the game installed.
+Monitors save directory for changes, decrypts + parses save files, uploads to backend API.
 """
 
 import json
@@ -9,13 +8,15 @@ import logging
 import os
 import sys
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-from parser import generate_mock_data
+from crypto import decrypt_save, DecryptionError
+from parser import parse_parc
 
 logging.basicConfig(
     level=logging.INFO,
@@ -40,8 +41,7 @@ def find_save_directory(config: dict) -> Path:
 
     if steam_id == "auto":
         if not base.exists():
-            return base  # Will fail later, but that's OK for mock mode
-        # Find first steam ID directory
+            return base
         for d in base.iterdir():
             if d.is_dir() and d.name.isdigit():
                 log.info(f"Auto-detected Steam ID: {d.name}")
@@ -49,6 +49,59 @@ def find_save_directory(config: dict) -> Path:
         return base
     else:
         return base / steam_id
+
+
+def format_payload(parsed: dict, filepath: str) -> dict:
+    """Convert parser output to backend UploadPayload format."""
+    char = parsed.get("character", {})
+    now = datetime.now(timezone.utc)
+
+    # Extract slot from path (e.g., .../slot0/save.save → slot0)
+    path = Path(filepath)
+    slot = path.parent.name if path.parent.name.startswith("slot") else "unknown"
+
+    return {
+        "character": {
+            "name": "Kliff",  # PARC doesn't store name as plain text; Kliff is the protagonist
+            "level": char.get("level", 0),
+            "playtime_seconds": 0,  # Not directly in CharacterStatusSaveData
+            "currency_silver": 0,   # Would need to scan inventory for silver item
+            "stats": {
+                "hp": char.get("currentHp", 0),
+                "stamina": 0,
+                "attack": 0,
+                "defense": 0,
+            },
+        },
+        "inventory": [
+            {
+                "item_key": str(item["itemKey"]),
+                "name": item["name"],
+                "category": item["category"],
+                "stack_count": item["stack"],
+                "slot_index": item["slot"],
+            }
+            for item in parsed.get("inventory", [])
+        ],
+        "equipment": [
+            {
+                "item_key": str(item["itemKey"]),
+                "name": item["name"],
+                "slot_type": item["slot_name"],
+                "enchant_level": item["enchant"],
+                "endurance": item["endurance"],
+                "sharpness": item["sharpness"],
+            }
+            for item in parsed.get("equipment", [])
+        ],
+        "quests": [],  # Quest details require deeper PARC parsing
+        "mercenaries": [],
+        "save_meta": {
+            "slot": slot,
+            "timestamp": now.isoformat(),
+            "game_version": "1.0",
+        },
+    }
 
 
 def upload_snapshot(endpoint: str, api_key: str, data: dict) -> bool:
@@ -100,40 +153,67 @@ class SaveFileHandler(FileSystemEventHandler):
     def process_save(self, filepath: str):
         """Process a save file: decrypt → parse → upload."""
         try:
-            # TODO: Replace with real crypto + parser pipeline
-            # from crypto import decrypt_save
-            # from parser import parse_parc
-            # raw = Path(filepath).read_bytes()
-            # decompressed = decrypt_save(raw)
-            # data = parse_parc(decompressed)
+            raw = Path(filepath).read_bytes()
+            log.info(f"Read {len(raw):,} bytes from {filepath}")
 
-            # For now, use mock data
-            log.warning("Using mock data (PARC parser not yet implemented)")
-            data = generate_mock_data()
+            # Decrypt (ChaCha20 + LZ4)
+            decompressed = decrypt_save(raw)
+            log.info(f"Decrypted → {len(decompressed):,} bytes PARC data")
 
+            # Parse PARC binary
+            parsed = parse_parc(decompressed)
+            char = parsed.get("character", {})
+            equip_count = len(parsed.get("equipment", []))
+            inv_count = len(parsed.get("inventory", []))
+            log.info(
+                f"Parsed: Level {char.get('level', '?')}, "
+                f"{equip_count} equipment, {inv_count} inventory items"
+            )
+
+            # Format for backend API
+            payload = format_payload(parsed, filepath)
+
+            # Upload
             upload_snapshot(
                 self.config["api_endpoint"],
                 self.config["api_key"],
-                data,
+                payload,
             )
+        except DecryptionError as e:
+            log.error(f"Decryption failed: {e}")
         except Exception as e:
-            log.error(f"Failed to process save: {e}")
+            log.error(f"Failed to process save: {e}", exc_info=True)
 
 
 def run_mock_mode(config: dict):
-    """Upload a single mock snapshot (for testing without the game)."""
-    log.info("Running in MOCK MODE — uploading test data")
-    data = generate_mock_data()
-    success = upload_snapshot(config["api_endpoint"], config["api_key"], data)
-    if success:
-        log.info("Mock upload complete")
+    """Process the test save file (for testing without the game running)."""
+    test_save = Path(__file__).parent / "test_save.save"
+    if test_save.exists():
+        log.info(f"MOCK MODE — processing test save: {test_save}")
+        try:
+            raw = test_save.read_bytes()
+            decompressed = decrypt_save(raw)
+            parsed = parse_parc(decompressed)
+            payload = format_payload(parsed, str(test_save))
+
+            log.info(f"Parsed: Level {parsed['character'].get('level')}, "
+                     f"{len(parsed['equipment'])} equipment")
+
+            success = upload_snapshot(config["api_endpoint"], config["api_key"], payload)
+            if success:
+                log.info("Mock upload complete")
+            else:
+                log.error("Mock upload failed")
+        except Exception as e:
+            log.error(f"Mock mode failed: {e}", exc_info=True)
     else:
-        log.error("Mock upload failed")
+        log.error(f"No test save file at {test_save}")
 
 
 def main():
     config = load_config()
     log.info("Crimson Desert Save Watcher starting...")
+    log.info("Pipeline: SAVE header → ChaCha20 decrypt → LZ4 decompress → PARC parse")
 
     if config.get("mock_mode", False):
         run_mock_mode(config)

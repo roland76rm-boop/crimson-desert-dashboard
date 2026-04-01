@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+test_save.save
+test_save_decompressed.bin
+config.json
