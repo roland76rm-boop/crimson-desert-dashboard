@@ -153,7 +153,13 @@ class SaveFileHandler(FileSystemEventHandler):
     def process_save(self, filepath: str):
         """Process a save file: decrypt → parse → upload."""
         try:
-            raw = Path(filepath).read_bytes()
+            p = Path(filepath)
+            if not p.exists():
+                log.debug(f"File gone (temp rename by game), skipping: {filepath}")
+                return
+            # Small delay — game may still be writing
+            time.sleep(0.5)
+            raw = p.read_bytes()
             log.info(f"Read {len(raw):,} bytes from {filepath}")
 
             # Decrypt (ChaCha20 + LZ4)
