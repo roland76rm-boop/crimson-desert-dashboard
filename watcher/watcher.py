@@ -94,7 +94,15 @@ def format_payload(parsed: dict, filepath: str) -> dict:
             }
             for item in parsed.get("equipment", [])
         ],
-        "quests": [],  # Quest details require deeper PARC parsing
+        "quests": [
+            {
+                "quest_key": str(q["key"]),
+                "name": q["name"],
+                "status": q["status"],
+                "completed_at": now.isoformat() if q["status"] == "completed" else None,
+            }
+            for q in parsed.get("quests", {}).get("states", [])
+        ],
         "mercenaries": [],
         "save_meta": {
             "slot": slot,
