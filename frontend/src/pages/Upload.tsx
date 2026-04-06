@@ -28,7 +28,7 @@ export default function Upload() {
       const form = new FormData()
       form.append('file', file)
       form.append('slot', 'slot0')
-      const res = await fetch(`${API_URL}/upload`, {
+      const res = await fetch(`${API_URL}/upload-file`, {
         method: 'POST',
         headers: { 'X-API-Key': apiKey },
         body: form,
