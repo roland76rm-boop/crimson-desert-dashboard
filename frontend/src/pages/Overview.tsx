@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
 import { formatPlaytime, formatSilver, timeAgo } from '../lib/utils'
 import StatCard from '../components/StatCard'
@@ -36,6 +37,12 @@ export default function Overview() {
           <p className="text-slate-400 mt-1">Level {c.level} &middot; {formatPlaytime(c.playtime_seconds)} Spielzeit</p>
           <p className="text-slate-500 text-sm mt-1">Letzter Snapshot: {timeAgo(c.uploaded_at)}</p>
         </div>
+        <Link
+          to="/upload"
+          className="shrink-0 flex items-center gap-2 px-4 py-2.5 bg-crimson hover:bg-crimson/80 text-white text-sm font-bold rounded-lg transition-colors"
+        >
+          <span>⬆</span> Save hochladen
+        </Link>
       </div>
 
       {/* Quick stats */}
