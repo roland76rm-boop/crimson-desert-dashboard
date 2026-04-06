@@ -19,28 +19,53 @@ DATA_DIR = Path(__file__).parent / "data"
 
 
 def _load_item_lookup() -> dict[int, dict]:
-    """Load item_names.json → {itemKey: {name, category, internalName}}"""
+    """Load item names — prefer German (item_names_de.json), fallback to English."""
     try:
-        data = json.loads((DATA_DIR / "item_names.json").read_text())
-        items = data.get("items", [])
-        return {item["itemKey"]: item for item in items}
-    except Exception:
+        # Try German first
+        de_path = DATA_DIR / "item_names_de.json"
+        en_path = DATA_DIR / "item_names.json"
+        path = de_path if de_path.exists() else en_path
+
+        data = json.loads(path.read_text())
+        items = data.get("items", data) if isinstance(data, dict) else data
+        lookup = {}
+        for item in items:
+            entry = dict(item)
+            # Use German name if available, otherwise English
+            if "name_de" in entry:
+                entry["name"] = entry["name_de"]
+            lookup[item["itemKey"]] = entry
+        print(f"  Items geladen: {len(lookup)} ({'DE' if de_path.exists() else 'EN'})")
+        return lookup
+    except Exception as e:
+        print(f"  WARNUNG: Item-Daten nicht geladen: {e}")
         return {}
 
 
 def _load_quest_lookup() -> dict[int, str]:
-    """Load quest_names.json → {questKey: display_name}"""
+    """Load quest names — prefer German (quest_names_de.json), fallback to English."""
     try:
-        data = json.loads((DATA_DIR / "quest_names.json").read_text())
+        de_path = DATA_DIR / "quest_names_de.json"
+        en_path = DATA_DIR / "quest_names.json"
+        path = de_path if de_path.exists() else en_path
+
+        data = json.loads(path.read_text())
         if isinstance(data, list):
-            return {q["key"]: q.get("display", q.get("name", "?")) for q in data}
+            lookup = {}
+            for q in data:
+                # Prefer German display/name
+                name = q.get("display_de", q.get("name_de", q.get("display", q.get("name", "?"))))
+                lookup[q["key"]] = name
+            print(f"  Quests geladen: {len(lookup)} ({'DE' if de_path.exists() else 'EN'})")
+            return lookup
         return {}
-    except Exception:
+    except Exception as e:
+        print(f"  WARNUNG: Quest-Daten nicht geladen: {e}")
         return {}
 
 
 def _load_mission_lookup() -> dict[int, str]:
-    """Load mission_names.json → {missionKey: display_name}"""
+    """Load mission names — German not yet available, use English."""
     try:
         data = json.loads((DATA_DIR / "mission_names.json").read_text())
         if isinstance(data, list):
@@ -50,9 +75,22 @@ def _load_mission_lookup() -> dict[int, str]:
         return {}
 
 
+# Load EN→DE translation map for anything not covered by specific files
+def _load_translation_map() -> dict[str, str]:
+    """Load translation_en_de.json for general EN→DE lookups."""
+    try:
+        path = DATA_DIR / "translation_en_de.json"
+        if path.exists():
+            return json.loads(path.read_text())
+    except Exception:
+        pass
+    return {}
+
+
 ITEM_LOOKUP = _load_item_lookup()
 QUEST_LOOKUP = _load_quest_lookup()
 MISSION_LOOKUP = _load_mission_lookup()
+EN_DE_MAP = _load_translation_map()
 
 
 # ── Equipment slot mapping ───────────────────────────────────────────────────

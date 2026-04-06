@@ -1,9 +1,8 @@
 {
   "save_directory": "C:\\Users\\Roland\\AppData\\Local\\Pearl Abyss\\CD\\save",
   "api_endpoint": "https://cd.haus543.at/api/upload",
-  "api_key": "CHANGE_ME",
+  "api_key": "8a0a19688ecea495bc23c86f1db4a709adf8b03abd5cf0fd5f7e8312572f8a9f",
   "watch_interval_seconds": 5,
-  "upload_raw_save": false,
   "steam_id": "auto",
-  "mock_mode": true
+  "mock_mode": false
 }

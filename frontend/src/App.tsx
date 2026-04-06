@@ -7,6 +7,7 @@ import Quests from './pages/Quests'
 import Mercenaries from './pages/Mercenaries'
 import Timeline from './pages/Timeline'
 import Settings from './pages/Settings'
+import Upload from './pages/Upload'
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="quests" element={<Quests />} />
         <Route path="mercenaries" element={<Mercenaries />} />
         <Route path="timeline" element={<Timeline />} />
+        <Route path="upload" element={<Upload />} />
         <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>

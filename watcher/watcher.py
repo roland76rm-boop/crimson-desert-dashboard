@@ -162,9 +162,32 @@ class SaveFileHandler(FileSystemEventHandler):
         """Process a save file: decrypt → parse → upload."""
         try:
             p = Path(filepath)
+
+            # Game writes to slotX_new/ then renames to slotX/
+            # When we get the event, _new dir may already be renamed
+            if "_new" in p.parent.name:
+                # Convert slot0_new → slot0, slot1_new → slot1, etc.
+                final_dir = p.parent.name.replace("_new", "")
+                final_path = p.parent.parent / final_dir / p.name
+                log.info(f"Temp-Pfad erkannt, warte auf Umbenennung: {p.parent.name} → {final_dir}")
+                # Wait for rename to complete (up to 5 seconds)
+                for i in range(10):
+                    time.sleep(0.5)
+                    if final_path.exists():
+                        p = final_path
+                        break
+                else:
+                    # Also check if original _new path still exists
+                    if p.exists():
+                        pass  # use original path
+                    else:
+                        log.warning(f"Save-Datei nicht gefunden nach Umbenennung: {final_path}")
+                        return
+
             if not p.exists():
-                log.debug(f"File gone (temp rename by game), skipping: {filepath}")
+                log.debug(f"Datei nicht gefunden, ueberspringe: {p}")
                 return
+
             # Small delay — game may still be writing
             time.sleep(0.5)
             raw = p.read_bytes()

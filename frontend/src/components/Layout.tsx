@@ -7,6 +7,7 @@ const links = [
   { to: '/quests', label: 'Quests' },
   { to: '/mercenaries', label: 'Söldner' },
   { to: '/timeline', label: 'Timeline' },
+  { to: '/upload', label: '⬆ Upload' },
   { to: '/settings', label: 'Einstellungen' },
 ]
 
