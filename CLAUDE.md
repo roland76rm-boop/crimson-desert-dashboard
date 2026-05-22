@@ -52,6 +52,13 @@ save.save → parse_header() → ChaCha20 decrypt → LZ4 decompress → PARC pa
 - **Vercel Frontend:** Team `rolands-projects-0fbc8a46`, Project `crimson-desert-dashboard`
   - Env: `VITE_API_URL=http://cd.haus543.at/api`
 - **GitHub:** `roland76rm-boop/crimson-desert-dashboard`
+  - ⚠️ Das Repo war zwischenzeitlich **archiviert** (2026-05-22 entarchiviert).
+    Dadurch ist die Vercel↔GitHub-Webhook-Integration unterbrochen — Pushes
+    lösen **kein** Auto-Deploy mehr aus. Bis die Git-Integration im
+    Vercel-Dashboard neu verbunden ist: manuell deployen mit
+    `cd frontend && vercel deploy --prod --yes`.
+  - Frontend ist mit dem Gaming-Hub Design-System abgestimmt (Vorlagen siehe
+    Master-CLAUDE.md → `~/projects/gaming_dashboards/layout/Gamin Dashboard/`).
 
 ## Status
 - [x] Backend: API Endpoints + DB Schema + Mock-Seed (10 Snapshots)
