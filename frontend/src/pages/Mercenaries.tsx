@@ -2,17 +2,12 @@ import { useQuery } from '@tanstack/react-query'
 import { api } from '../lib/api'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorMessage from '../components/ErrorMessage'
+import { Panel } from '../components/Panel'
 
 const typeLabels: Record<string, string> = {
   companion: 'Begleiter',
   pet: 'Tier',
   mount: 'Reittier',
-}
-
-const typeIcons: Record<string, string> = {
-  companion: '\u2694',
-  pet: '\uD83D\uDC3E',
-  mount: '\uD83D\uDC0E',
 }
 
 export default function Mercenaries() {
@@ -24,26 +19,24 @@ export default function Mercenaries() {
   const mercs = data ?? []
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-bold text-gold">Söldner & Begleiter</h2>
+    <Panel eyebrow="Gefolge" title={`Söldner & Begleiter · ${mercs.length}`}>
       {mercs.length === 0 ? (
-        <p className="text-slate-500">Noch keine Söldner oder Begleiter.</p>
+        <p style={{ padding: '14px 16px', fontSize: 12, color: 'var(--fg-mute)' }}>Noch keine Söldner oder Begleiter.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4">
           {mercs.map((m, i) => (
-            <div key={`${m.merc_key}-${i}`} className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{typeIcons[m.type] ?? '\u2726'}</span>
-                <div>
-                  <p className="font-medium text-slate-200">{m.custom_name ?? m.name}</p>
-                  {m.custom_name && <p className="text-xs text-slate-500">({m.name})</p>}
-                  <p className="text-xs text-slate-400 mt-0.5">{typeLabels[m.type] ?? m.type}</p>
-                </div>
+            <div key={`${m.merc_key}-${i}`} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid var(--hairline)', borderLeft: '2px solid var(--accent)', padding: 13 }}>
+              <div className="gh-eyebrow" style={{ fontSize: 8.5 }}>{typeLabels[m.type] ?? m.type}</div>
+              <div className="gh-display" style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginTop: 4 }}>
+                {m.custom_name ?? m.name}
               </div>
+              {m.custom_name && (
+                <div className="gh-mono" style={{ fontSize: 10, color: 'var(--fg-mute)', marginTop: 2 }}>({m.name})</div>
+              )}
             </div>
           ))}
         </div>
       )}
-    </div>
+    </Panel>
   )
 }

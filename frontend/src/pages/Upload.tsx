@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { Panel } from '../components/Panel'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'https://cd.haus543.at/api'
 const API_KEY = import.meta.env.VITE_API_KEY ?? ''
@@ -20,7 +21,7 @@ export default function Upload() {
 
   const handleUpload = async () => {
     if (!file) return
-    if (!apiKey) { setMessage('API Key fehlt'); return }
+    if (!apiKey) { setMessage('API Key fehlt'); setStatus('error'); return }
     setStatus('uploading')
     setMessage('')
     setResult(null)
@@ -36,127 +37,111 @@ export default function Upload() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.detail ?? `HTTP ${res.status}`)
       setStatus('success')
-      setMessage('✅ Save-File erfolgreich hochgeladen und geparst!')
+      setMessage('Save-File erfolgreich hochgeladen und geparst.')
       setResult(data as UploadResult)
     } catch (e) {
       setStatus('error')
-      setMessage(`❌ Fehler: ${String(e)}`)
+      setMessage(`Fehler: ${String(e)}`)
     }
   }
 
   return (
-    <div className="max-w-xl mx-auto py-8 space-y-6">
+    <div className="flex flex-col gap-5" style={{ maxWidth: 560, margin: '0 auto' }}>
       <div>
-        <h2 className="text-2xl font-bold text-gold mb-1">Save-File hochladen</h2>
-        <p className="text-slate-400 text-sm">
-          Lade deine <code className="text-crimson">save.save</code> Datei hoch um das Dashboard zu aktualisieren.
-        </p>
-        <p className="text-slate-500 text-xs mt-1">
-          Pfad: <code>%LOCALAPPDATA%\Pearl Abyss\CD\save\63006856\slot0\save.save</code>
+        <div className="gh-eyebrow-accent">Save-Sync</div>
+        <h2 className="gh-display" style={{ fontSize: 22, fontWeight: 700, color: '#fff', margin: '5px 0 6px' }}>
+          Save-File hochladen
+        </h2>
+        <p style={{ fontSize: 12, color: 'var(--fg-mute)', lineHeight: 1.5 }}>
+          Lade deine <span className="gh-mono" style={{ color: 'var(--accent)' }}>save.save</span> Datei hoch, um das
+          Dashboard zu aktualisieren. Pfad:{' '}
+          <span className="gh-mono" style={{ color: 'var(--fg-faint)' }}>%LOCALAPPDATA%\Pearl Abyss\CD\save\…\slot0\save.save</span>
         </p>
       </div>
 
-      {/* API Key */}
-      <div>
-        <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">API Key</label>
-        <input
-          type="password"
-          value={apiKey}
-          onChange={e => setApiKey(e.target.value)}
-          placeholder="API Key eingeben..."
-          className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-crimson"
-        />
-      </div>
+      <Panel eyebrow="Authentifizierung" title="API Key">
+        <div className="p-4">
+          <input
+            type="password"
+            value={apiKey}
+            onChange={e => setApiKey(e.target.value)}
+            placeholder="API Key eingeben…"
+            className="gh-input w-full"
+          />
+        </div>
+      </Panel>
 
       {/* Dropzone */}
       <div
         onDrop={handleDrop}
         onDragOver={e => e.preventDefault()}
         onClick={() => inputRef.current?.click()}
-        className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors ${
-          file ? 'border-gold bg-gold/5' : 'border-slate-600 hover:border-slate-500 bg-slate-800/50'
-        }`}
+        className="gh-card"
+        style={{
+          padding: 36, textAlign: 'center', cursor: 'pointer',
+          borderStyle: 'dashed',
+          borderColor: file ? 'rgb(var(--accent-glow) / 0.5)' : 'var(--border-2)',
+          background: file ? 'rgb(var(--accent-glow) / 0.05)' : 'var(--card)',
+        }}
       >
-        <input
-          ref={inputRef}
-          type="file"
-          accept=".save"
-          className="hidden"
-          onChange={e => setFile(e.target.files?.[0] ?? null)}
-        />
+        <input ref={inputRef} type="file" accept=".save" className="hidden" onChange={e => setFile(e.target.files?.[0] ?? null)} />
         {file ? (
           <div>
-            <div className="text-3xl mb-2">📁</div>
-            <div className="text-gold font-bold">{file.name}</div>
-            <div className="text-slate-400 text-sm">{(file.size / 1024).toFixed(1)} KB</div>
+            <div className="gh-display" style={{ fontSize: 14, fontWeight: 700, color: 'var(--accent)' }}>{file.name}</div>
+            <div className="gh-mono" style={{ fontSize: 11, color: 'var(--fg-mute)', marginTop: 3 }}>{(file.size / 1024).toFixed(1)} KB</div>
             <button
               onClick={e => { e.stopPropagation(); setFile(null) }}
-              className="mt-2 text-xs text-slate-500 hover:text-red-400 transition-colors"
+              className="gh-mono"
+              style={{ marginTop: 8, fontSize: 10, color: 'var(--fg-faint)', background: 'none', border: 0, cursor: 'pointer' }}
             >
               Datei entfernen
             </button>
           </div>
         ) : (
           <div>
-            <div className="text-3xl mb-2">⬆️</div>
-            <div className="text-slate-300 font-medium">save.save hierher ziehen</div>
-            <div className="text-slate-500 text-sm mt-1">oder klicken zum Auswählen</div>
+            <div className="gh-eyebrow">save.save hierher ziehen</div>
+            <div className="gh-mono" style={{ fontSize: 11, color: 'var(--fg-faint)', marginTop: 5 }}>oder klicken zum Auswählen</div>
           </div>
         )}
       </div>
 
-      {/* Upload Button */}
       <button
         onClick={handleUpload}
         disabled={!file || status === 'uploading'}
-        className={`w-full py-3 rounded-xl font-bold text-sm transition-all ${
-          !file || status === 'uploading'
-            ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
-            : 'bg-crimson hover:bg-crimson/80 text-white'
-        }`}
+        className="gh-btn gh-btn-primary w-full"
+        style={{ height: 40, justifyContent: 'center', opacity: !file || status === 'uploading' ? 0.4 : 1 }}
       >
-        {status === 'uploading' ? '⏳ Wird hochgeladen...' : 'Save-File hochladen'}
+        {status === 'uploading' ? 'Wird hochgeladen…' : 'Save-File hochladen'}
       </button>
 
-      {/* Status */}
       {message && (
-        <div className={`rounded-xl p-4 text-sm font-medium ${
-          status === 'success' ? 'bg-green-900/30 text-green-300 border border-green-700' :
-          status === 'error'   ? 'bg-red-900/30 text-red-300 border border-red-700' : ''
-        }`}>
-          {message}
+        <div className="gh-card" style={{ padding: 14, borderLeft: `2px solid ${status === 'success' ? 'var(--ok)' : 'var(--bad)'}` }}>
+          <span style={{ fontSize: 12.5, color: status === 'success' ? 'var(--ok)' : 'var(--bad)' }}>{message}</span>
         </div>
       )}
 
-      {/* Ergebnis */}
       {result && (
-        <div className="bg-slate-800 rounded-xl p-4 space-y-2">
-          <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Geparste Daten</div>
-          {result.character_name && (
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-400">Charakter</span>
-              <span className="text-gold font-bold">{String(result.character_name)}</span>
-            </div>
-          )}
-          {result.character_level != null && (
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-400">Level</span>
-              <span className="text-white font-bold">{result.character_level}</span>
-            </div>
-          )}
-          {result.playtime_seconds != null && result.playtime_seconds > 0 && (
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-400">Spielzeit</span>
-              <span className="text-white">{Math.floor(result.playtime_seconds / 3600)}h {Math.floor((result.playtime_seconds % 3600) / 60)}min</span>
-            </div>
-          )}
-          {result.snapshot_id != null && (
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-400">Snapshot ID</span>
-              <span className="text-slate-300">#{result.snapshot_id}</span>
-            </div>
-          )}
-        </div>
+        <Panel eyebrow="Ergebnis" title="Geparste Daten">
+          <div>
+            {[
+              result.character_name != null && { label: 'Charakter', value: String(result.character_name), accent: true },
+              result.character_level != null && { label: 'Level', value: String(result.character_level) },
+              result.playtime_seconds != null && result.playtime_seconds > 0 && {
+                label: 'Spielzeit',
+                value: `${Math.floor(result.playtime_seconds / 3600)}h ${Math.floor((result.playtime_seconds % 3600) / 60)}min`,
+              },
+              result.snapshot_id != null && { label: 'Snapshot ID', value: `#${result.snapshot_id}` },
+            ].filter(Boolean).map((r, i) => {
+              const row = r as { label: string; value: string; accent?: boolean }
+              return (
+                <div key={i} className="flex justify-between items-center px-4 py-3" style={{ borderTop: i > 0 ? '1px solid var(--hairline)' : 'none' }}>
+                  <span className="gh-eyebrow" style={{ fontSize: 9.5 }}>{row.label}</span>
+                  <span className="gh-mono" style={{ fontSize: 12, color: row.accent ? 'var(--accent)' : '#fff', fontWeight: 600 }}>{row.value}</span>
+                </div>
+              )
+            })}
+          </div>
+        </Panel>
       )}
     </div>
   )

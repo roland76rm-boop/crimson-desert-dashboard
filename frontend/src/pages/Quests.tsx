@@ -3,6 +3,13 @@ import { api } from '../lib/api'
 import { formatDate } from '../lib/utils'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorMessage from '../components/ErrorMessage'
+import { Panel } from '../components/Panel'
+
+const STATUS_COLOR: Record<string, string> = {
+  active: 'var(--accent)',
+  completed: 'var(--ok)',
+  failed: 'var(--bad)',
+}
 
 export default function Quests() {
   const { data, isLoading, isError } = useQuery({ queryKey: ['quests'], queryFn: api.quests })
@@ -15,56 +22,64 @@ export default function Quests() {
   const completed = quests.filter(q => q.status === 'completed')
   const failed = quests.filter(q => q.status === 'failed')
 
-  const statusBadge: Record<string, string> = {
-    active: 'bg-gold/20 text-gold',
-    completed: 'bg-green-500/20 text-green-400',
-    failed: 'bg-crimson/20 text-crimson',
-  }
-
   const total = quests.length
   const pct = total > 0 ? Math.round((completed.length / total) * 100) : 0
 
   return (
-    <div className="space-y-6">
-      {/* Progress bar */}
-      <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-        <div className="flex justify-between text-sm mb-2">
-          <span className="text-slate-400">Quest-Fortschritt</span>
-          <span className="text-gold font-medium">{completed.length}/{total} ({pct}%)</span>
+    <div className="flex flex-col gap-5">
+      {/* Fortschritt */}
+      <section className="gh-card" style={{ padding: 16 }}>
+        <div className="flex justify-between items-baseline mb-2">
+          <span className="gh-eyebrow">Quest-Fortschritt</span>
+          <span className="gh-mono" style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600 }}>
+            {completed.length}/{total} · {pct}%
+          </span>
         </div>
-        <div className="w-full bg-slate-700 rounded-full h-3">
-          <div className="h-3 rounded-full bg-gold" style={{ width: `${pct}%` }} />
+        <div style={{ height: 6, background: 'rgba(0,0,0,0.4)' }}>
+          <div style={{ height: '100%', width: `${pct}%`, background: 'var(--accent)' }} />
         </div>
-      </div>
+      </section>
 
-      {/* Sections */}
       {[
         { title: 'Aktive Quests', items: active, emptyMsg: 'Keine aktiven Quests.' },
         { title: 'Abgeschlossen', items: completed, emptyMsg: 'Noch keine Quests abgeschlossen.' },
         ...(failed.length > 0 ? [{ title: 'Fehlgeschlagen', items: failed, emptyMsg: '' }] : []),
       ].map(section => (
-        <div key={section.title}>
-          <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-3">
-            {section.title} ({section.items.length})
-          </h3>
+        <Panel key={section.title} eyebrow="Quests" title={`${section.title} · ${section.items.length}`}>
           {section.items.length === 0 ? (
-            <p className="text-slate-600 text-sm">{section.emptyMsg}</p>
+            <p style={{ padding: '14px 16px', fontSize: 12, color: 'var(--fg-mute)' }}>{section.emptyMsg}</p>
           ) : (
-            <div className="space-y-2">
+            <div>
               {section.items.map((q, i) => (
-                <div key={`${q.quest_key}-${i}`} className="bg-slate-800 rounded-lg px-4 py-3 border border-slate-700 flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">{q.quest_name ?? q.quest_key}</p>
-                    {q.completed_at && <p className="text-xs text-slate-500 mt-0.5">Abgeschlossen: {formatDate(q.completed_at)}</p>}
+                <div
+                  key={`${q.quest_key}-${i}`}
+                  className="flex items-center justify-between px-4 py-3"
+                  style={{
+                    borderTop: i > 0 ? '1px solid var(--hairline)' : 'none',
+                    borderLeft: `2px solid ${STATUS_COLOR[q.status] ?? 'var(--border-2)'}`,
+                  }}
+                >
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 12.5, color: '#fff', fontWeight: 500 }}>{q.quest_name ?? q.quest_key}</div>
+                    {q.completed_at && (
+                      <div className="gh-mono" style={{ fontSize: 10, color: 'var(--fg-faint)', marginTop: 2 }}>
+                        Abgeschlossen: {formatDate(q.completed_at)}
+                      </div>
+                    )}
                   </div>
-                  <span className={`px-2 py-0.5 rounded text-xs font-medium ${statusBadge[q.status] ?? 'bg-slate-700 text-slate-400'}`}>
+                  <span className="gh-mono shrink-0" style={{
+                    fontSize: 9.5, padding: '2px 8px', letterSpacing: '0.08em', textTransform: 'uppercase',
+                    color: STATUS_COLOR[q.status] ?? 'var(--fg-mute)',
+                    border: `1px solid ${STATUS_COLOR[q.status] ?? 'var(--border-2)'}55`,
+                    background: `${STATUS_COLOR[q.status] ?? 'transparent'}14`,
+                  }}>
                     {q.status}
                   </span>
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </Panel>
       ))}
     </div>
   )

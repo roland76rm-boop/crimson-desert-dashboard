@@ -6,17 +6,14 @@ interface StatCardProps {
 }
 
 export default function StatCard({ label, value, sub, accent = 'default' }: StatCardProps) {
-  const accentColor = {
-    crimson: 'text-crimson',
-    gold: 'text-gold',
-    default: 'text-slate-200',
-  }[accent]
-
+  const color = accent === 'gold' ? 'var(--accent)'
+    : accent === 'crimson' ? 'var(--bad)'
+    : '#fff'
   return (
-    <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-      <p className="text-slate-400 text-xs uppercase tracking-wider mb-1">{label}</p>
-      <p className={`text-2xl font-bold ${accentColor}`}>{value}</p>
-      {sub && <p className="text-slate-500 text-xs mt-1">{sub}</p>}
+    <div className="gh-card" style={{ padding: '13px 15px' }}>
+      <div className="gh-eyebrow" style={{ fontSize: 9.5 }}>{label}</div>
+      <div className="gh-mono" style={{ fontSize: 24, fontWeight: 700, color, lineHeight: 1.1, marginTop: 6 }}>{value}</div>
+      {sub && <div style={{ fontSize: 11, color: 'var(--fg-mute)', marginTop: 3 }}>{sub}</div>}
     </div>
   )
 }

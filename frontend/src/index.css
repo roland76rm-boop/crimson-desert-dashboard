@@ -66,3 +66,82 @@ h1, h2, h3 { font-family: 'Chakra Petch', 'Inter', system-ui, sans-serif; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* =========================================================================
+   Design-System Tokens + gh-* Komponenten-Klassen (vom Hub übernommen)
+   ========================================================================= */
+:root {
+  --bg: #0d0d14; --surface: #14141f; --card: #1a1a2e; --card-2: #20203a;
+  --border: rgba(255,255,255,0.06); --border-2: rgba(255,255,255,0.12); --hairline: rgba(255,255,255,0.045);
+  --fg: #e8e8f0; --fg-dim: #a0a0b8; --fg-mute: #6a6a85; --fg-faint: #45455a;
+  --ok: #4ade80; --warn: #fbbf24; --bad: #f43f5e; --info: #60a5fa;
+  --accent: #f59e0b; --accent-2: #fbbf24; --accent-d: #b45309; --accent-glow: 245 158 11;
+  --f-display: 'Chakra Petch', system-ui, sans-serif;
+  --f-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --f-body: 'Inter', system-ui, sans-serif;
+}
+
+.gh-display { font-family: var(--f-display); font-weight: 600; letter-spacing: 0.02em; }
+.gh-mono    { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.gh-eyebrow {
+  font-family: var(--f-display);
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--fg-mute);
+}
+.gh-eyebrow-accent {
+  font-family: var(--f-display);
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--accent);
+}
+
+.gh-card { background: var(--card); border: 1px solid var(--border); position: relative; }
+.gh-card-strip::before {
+  content: ''; position: absolute; inset: 0 auto 0 0;
+  width: 2px; background: var(--accent);
+  box-shadow: 0 0 12px rgb(var(--accent-glow) / 0.6);
+}
+.gh-panel-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px; border-bottom: 1px solid var(--border);
+}
+
+.gh-pip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--f-mono); font-size: 11px; color: var(--fg-dim);
+}
+.gh-pip::before {
+  content: ''; width: 6px; height: 6px; border-radius: 999px;
+  background: var(--ok); box-shadow: 0 0 8px var(--ok);
+  animation: gh-pulse 2s ease-in-out infinite;
+}
+.gh-pip.bad::before { background: var(--bad); box-shadow: 0 0 8px var(--bad); animation: none; }
+.gh-pip.off::before { background: var(--fg-faint); box-shadow: none; animation: none; }
+@keyframes gh-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+.gh-btn {
+  height: 32px; padding: 0 14px;
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--f-display); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--fg); background: var(--card-2);
+  border: 1px solid var(--border-2); cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.gh-btn:hover { background: rgba(255,255,255,0.06); border-color: rgb(var(--accent-glow) / 0.5); color: #fff; }
+.gh-btn-primary {
+  background: linear-gradient(180deg, rgb(var(--accent-glow) / 0.25), rgb(var(--accent-glow) / 0.1));
+  border-color: rgb(var(--accent-glow) / 0.6); color: #fff;
+}
+.gh-btn-primary:hover { background: linear-gradient(180deg, rgb(var(--accent-glow) / 0.4), rgb(var(--accent-glow) / 0.15)); box-shadow: 0 0 16px rgb(var(--accent-glow) / 0.3); }
+
+.gh-input {
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--border-2);
+  color: var(--fg); font-family: var(--f-body); font-size: 13px;
+  padding: 8px 11px; outline: none;
+  transition: border-color .15s;
+}
+.gh-input:focus { border-color: rgb(var(--accent-glow) / 0.6); }
+.gh-input::placeholder { color: var(--fg-faint); }

@@ -5,6 +5,7 @@ import { formatPlaytime, formatSilver, timeAgo } from '../lib/utils'
 import StatCard from '../components/StatCard'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorMessage from '../components/ErrorMessage'
+import { Panel } from '../components/Panel'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 
 export default function Overview() {
@@ -26,27 +27,33 @@ export default function Overview() {
   })) ?? []
 
   return (
-    <div className="space-y-6">
-      {/* Character card */}
-      <div className="bg-slate-800 rounded-lg p-6 border border-slate-700 flex flex-col sm:flex-row items-start sm:items-center gap-6">
-        <div className="w-16 h-16 bg-crimson/20 rounded-full flex items-center justify-center text-3xl border-2 border-crimson/40">
-          &#9876;
+    <div className="flex flex-col gap-5">
+      {/* Charakter-Banner */}
+      <section className="gh-card gh-card-strip" style={{ padding: 20, overflow: 'hidden' }}>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+          <div style={{
+            width: 60, height: 60, flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 26,
+            background: 'rgb(var(--accent-glow) / 0.1)', border: '1px solid rgb(var(--accent-glow) / 0.4)',
+          }}>
+            &#9876;
+          </div>
+          <div className="flex-1" style={{ minWidth: 0 }}>
+            <div className="gh-eyebrow-accent">Aktiver Charakter</div>
+            <h2 className="gh-display" style={{ fontSize: 24, fontWeight: 700, color: '#fff', margin: '4px 0 0' }}>
+              {c.name ?? 'Unbekannt'}
+            </h2>
+            <div className="gh-mono" style={{ fontSize: 11, color: 'var(--fg-mute)', marginTop: 4 }}>
+              Level {c.level} · {formatPlaytime(c.playtime_seconds)} Spielzeit · Snapshot {timeAgo(c.uploaded_at)}
+            </div>
+          </div>
+          <Link to="/upload" className="gh-btn gh-btn-primary shrink-0" style={{ textDecoration: 'none' }}>
+            Save hochladen
+          </Link>
         </div>
-        <div className="flex-1">
-          <h2 className="text-2xl font-bold text-gold">{c.name ?? 'Unbekannt'}</h2>
-          <p className="text-slate-400 mt-1">Level {c.level} &middot; {formatPlaytime(c.playtime_seconds)} Spielzeit</p>
-          <p className="text-slate-500 text-sm mt-1">Letzter Snapshot: {timeAgo(c.uploaded_at)}</p>
-        </div>
-        <Link
-          to="/upload"
-          className="shrink-0 flex items-center gap-2 px-4 py-2.5 bg-crimson hover:bg-crimson/80 text-white text-sm font-bold rounded-lg transition-colors"
-        >
-          <span>⬆</span> Save hochladen
-        </Link>
-      </div>
+      </section>
 
-      {/* Quick stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Kennzahlen */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatCard label="Level" value={c.level ?? '—'} accent="gold" />
         <StatCard label="Silber" value={formatSilver(c.currency_silver)} accent="gold" />
         <StatCard label="Items" value={inv.data?.length ?? '—'} />
@@ -55,30 +62,32 @@ export default function Overview() {
 
       {/* Stats */}
       {c.stats && Object.keys(c.stats).length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {Object.entries(c.stats).map(([key, val]) => (
-            <StatCard key={key} label={key.toUpperCase()} value={val} />
+            <StatCard key={key} label={key} value={val} />
           ))}
         </div>
       )}
 
-      {/* Level chart */}
+      {/* Level-Chart */}
       {chartData.length > 1 && (
-        <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-          <h3 className="text-sm font-medium text-slate-400 mb-4">Level-Fortschritt</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="date" tick={{ fill: '#94A3B8', fontSize: 12 }} />
-              <YAxis tick={{ fill: '#94A3B8', fontSize: 12 }} />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: 0 }}
-                labelStyle={{ color: '#94A3B8' }}
-              />
-              <Line type="monotone" dataKey="level" stroke="#D4AF37" strokeWidth={2} dot={{ fill: '#D4AF37', r: 4 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        <Panel eyebrow="Verlauf" title="Level-Fortschritt">
+          <div className="p-4">
+            <ResponsiveContainer width="100%" height={240}>
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                <XAxis dataKey="date" tick={{ fill: '#6a6a85', fontSize: 11 }} />
+                <YAxis tick={{ fill: '#6a6a85', fontSize: 11 }} />
+                <Tooltip
+                  contentStyle={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 0, fontSize: 12 }}
+                  labelStyle={{ color: '#a0a0b8' }}
+                  itemStyle={{ color: '#f59e0b' }}
+                />
+                <Line type="monotone" dataKey="level" stroke="#f59e0b" strokeWidth={2} dot={{ fill: '#f59e0b', r: 3 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </Panel>
       )}
     </div>
   )
