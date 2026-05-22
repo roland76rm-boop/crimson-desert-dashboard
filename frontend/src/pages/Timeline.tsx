@@ -9,7 +9,7 @@ import {
 } from 'recharts'
 
 const tooltipStyle = {
-  contentStyle: { backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: 8 },
+  contentStyle: { backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: 0 },
   labelStyle: { color: '#94A3B8' },
 }
 

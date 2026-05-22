@@ -28,6 +28,15 @@
   --font-sans:    'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono:    'JetBrains Mono', ui-monospace, monospace;
   --font-display: 'Chakra Petch', 'Inter', system-ui, sans-serif;
+
+  /* Scharfe Ecken wie im Hub */
+  --radius-xs:  0;
+  --radius-sm:  0;
+  --radius-md:  0;
+  --radius-lg:  0;
+  --radius-xl:  0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
 }
 
 body {

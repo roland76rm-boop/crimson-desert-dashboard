@@ -72,7 +72,7 @@ export default function Overview() {
               <XAxis dataKey="date" tick={{ fill: '#94A3B8', fontSize: 12 }} />
               <YAxis tick={{ fill: '#94A3B8', fontSize: 12 }} />
               <Tooltip
-                contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: 8 }}
+                contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: 0 }}
                 labelStyle={{ color: '#94A3B8' }}
               />
               <Line type="monotone" dataKey="level" stroke="#D4AF37" strokeWidth={2} dot={{ fill: '#D4AF37', r: 4 }} />
