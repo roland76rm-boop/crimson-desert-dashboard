@@ -20,7 +20,7 @@ Architektur: File-Watcher (Gaming-PC) → FastAPI (VPS) → React/Vite (Vercel)
 - **Encryption**: ChaCha20 mit fixem 32-Byte Key
 - **Compression**: LZ4 Block
 - **Binary Format**: PARC (Pearl Abyss Reflect Container) — 69 Typen, 94 Objekte
-- **Key**: `9a4beb127f9e748b148d6690c25cc9379a315bd56c28af6319fd559f1152ac00`
+- **Key**: `<see password manager>` (ChaCha20 32-Byte Key — nicht im Repo dokumentieren)
 - **Quelle**: Decompiled aus CrimsonSaveEditor (PyInstaller → save_crypto.py + save_parser.py)
 
 ## Watcher Pipeline
