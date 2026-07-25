@@ -68,8 +68,8 @@ save.save → parse_header() → ChaCha20 decrypt → LZ4 decompress → PARC pa
 - [x] Item-Datenbank: 6022 Items mit Namen + Kategorien
 - [x] VPS Deployment: pm2 + nginx (Port 3011)
 - [x] Vercel Deployment
-- [ ] DNS: A-Records für cd.haus543.at + crimsondesert.haus543.at → 152.53.0.21
-- [ ] SSL/HTTPS für Backend
+- [x] DNS: A-Records für cd.haus543.at + crimsondesert.haus543.at → 152.53.0.21 — ✅ 2026-07-25 (Audit: erledigt/live verifiziert)
+- [x] SSL/HTTPS für Backend — ✅ 2026-07-25 (Audit: erledigt/live verifiziert)
 - [ ] Gaming-PC: Watcher Installation + API Key konfigurieren
 - [ ] Quest-Detail-Parsing (individuelle Quest-States aus PARC extrahieren)
 - [ ] Söldner-Detail-Parsing (Mercenary Clan Daten)
